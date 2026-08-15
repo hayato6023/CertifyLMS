@@ -40,6 +40,8 @@ final class IndexAction
 
         if ($status !== null) {
             $query->where('status', $status->value);
+        } else {
+            $query->where('status', '!=', UserStatus::Withdrawn->value);
         }
 
         $driver = $query->getConnection()->getDriverName();
