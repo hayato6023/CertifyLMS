@@ -10,6 +10,7 @@ use App\Enums\QaThreadStatus;
 use App\Http\Controllers\DashboardController;
 use App\Models\ChatRoom;
 use App\Models\Enrollment;
+use App\Models\LearningSession;
 use App\Models\Meeting;
 use App\Models\QaThread;
 use App\Models\User;
@@ -41,14 +42,20 @@ final class FetchCoachDashboardAction
     {
         $coachingCertificationIds = $coach->coachingCertificationIds();
 
+        // N+1 回避: 受講生 / 担当資格を Eager Load し、最終活動日時(最終学習セッションの started_at)は
+        // サブクエリで一括取得する。Blade / ViewModel が参照する last_activity_at エイリアスを維持するため
+        // withMax(参照名が変わる)ではなく addSelect のサブクエリを採用する。
         $assignedEnrollments = Enrollment::query()
             ->whereIn('certification_id', $coachingCertificationIds)
             ->whereIn('status', [EnrollmentStatus::Learning, EnrollmentStatus::Passed])
+            ->with(['user', 'certification'])
+            ->select('enrollments.*')
+            ->addSelect([
+                'last_activity_at' => LearningSession::query()
+                    ->whereColumn('enrollment_id', 'enrollments.id')
+                    ->selectRaw('MAX(started_at)'),
+            ])
             ->get();
-
-        foreach ($assignedEnrollments as $enrollment) {
-            $enrollment->last_activity_at = $enrollment->learningSessions()->max('started_at');
-        }
 
         $todayAndTomorrowMeetings = Meeting::query()
             ->where('coach_id', $coach->id)
