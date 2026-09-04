@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\MeetingPackController;
+use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\QaThreadModerationController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\BrowseController;
@@ -490,6 +491,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         ->name('admin.meeting-packs.archive');
     Route::post('meeting-packs/{plan}/unarchive', [MeetingPackController::class, 'unarchive'])
         ->name('admin.meeting-packs.unarchive');
+});
+
+// ============================================================
+// 管理者専用 — 受講プランのマスタ管理
+// ============================================================
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::resource('plans', PlanController::class)
+        ->parameters(['plans' => 'plan'])
+        ->names('admin.plans');
+
+    Route::post('plans/{plan}/publish', [PlanController::class, 'publish'])
+        ->name('admin.plans.publish');
+    Route::post('plans/{plan}/archive', [PlanController::class, 'archive'])
+        ->name('admin.plans.archive');
+    Route::post('plans/{plan}/unarchive', [PlanController::class, 'unarchive'])
+        ->name('admin.plans.unarchive');
 });
 
 // ============================================================
