@@ -28,6 +28,7 @@ use App\Http\Controllers\MockExamController;
 use App\Http\Controllers\MockExamQuestionController;
 use App\Http\Controllers\MockExamSessionController;
 use App\Http\Controllers\MockExamSessionMonitorController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\QaReplyController;
 use App\Http\Controllers\QaThreadController;
@@ -467,6 +468,19 @@ Route::middleware(['auth'])
         Route::put('password', [SettingsController::class, 'updatePassword'])->name('password.update');
         Route::post('avatar', [SettingsController::class, 'storeAvatar'])->name('avatar.store');
         Route::delete('avatar', [SettingsController::class, 'destroyAvatar'])->name('avatar.destroy');
+    });
+
+// ============================================================
+// アプリ内通知(全ロール共通、本人の通知のみ)
+// ============================================================
+Route::middleware(['auth'])
+    ->prefix('notifications')
+    ->name('notifications.')
+    ->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::post('read-all', [NotificationController::class, 'markAllAsRead'])->name('markAllAsRead');
+        Route::post('{notification}/read', [NotificationController::class, 'markAsRead'])->name('markAsRead');
+        Route::get('{notification}', [NotificationController::class, 'show'])->name('show');
     });
 
 // ============================================================
