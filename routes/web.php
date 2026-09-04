@@ -42,6 +42,7 @@ use App\Http\Controllers\SectionQuestionAnswerController;
 use App\Http\Controllers\SectionQuestionController;
 use App\Http\Controllers\SectionQuizController;
 use App\Http\Controllers\SectionQuizResultController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Settings\AvailabilityController as SettingsAvailabilityController;
 use App\Http\Controllers\Settings\SettingsDefaultEnrollmentController;
 use App\Http\Controllers\UserController;
@@ -453,6 +454,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('chat-rooms/{room}', [ChatRoomController::class, 'show'])
         ->name('admin.chat-rooms.show');
 });
+
+// ============================================================
+// 設定・プロフィール(全ロール共通、本人のみ / 修了済も利用可)
+// ============================================================
+Route::middleware(['auth'])
+    ->prefix('settings')
+    ->name('settings.')
+    ->group(function () {
+        Route::get('profile', [SettingsController::class, 'profile'])->name('profile');
+        Route::patch('profile', [SettingsController::class, 'updateProfile'])->name('profile.update');
+        Route::put('password', [SettingsController::class, 'updatePassword'])->name('password.update');
+        Route::post('avatar', [SettingsController::class, 'storeAvatar'])->name('avatar.store');
+        Route::delete('avatar', [SettingsController::class, 'destroyAvatar'])->name('avatar.destroy');
+    });
 
 // ============================================================
 // 受講生・コーチ共有 — 質問掲示板(公開 Q&A)
