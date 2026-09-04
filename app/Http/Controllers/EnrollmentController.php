@@ -104,6 +104,9 @@ class EnrollmentController extends Controller
 
         $action($enrollment);
 
+        // 個人目標を表示順(未達成先頭 → 期日近い順 → 新しい順)で eager load する
+        $enrollment->load(['goals' => fn ($q) => $q->displayOrder()]);
+
         $user = auth()->user();
         $progress = null;
 

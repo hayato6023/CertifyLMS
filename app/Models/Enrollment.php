@@ -143,6 +143,16 @@ class Enrollment extends Model
         return $this->hasOne(LearningHourTarget::class);
     }
 
+    /**
+     * 受講登録配下の個人学習目標(受講生本人が CRUD)。
+     *
+     * @return HasMany<EnrollmentGoal, $this>
+     */
+    public function goals(): HasMany
+    {
+        return $this->hasMany(EnrollmentGoal::class);
+    }
+
     public function scopeLearning(Builder $query): Builder
     {
         return $query->where('status', EnrollmentStatus::Learning->value);
