@@ -40,6 +40,8 @@ class Meeting extends Model
         'meeting_url_snapshot',
         'completed_at',
         'meeting_quota_transaction_id',
+        'reminder_eve_sent_at',
+        'reminder_one_hour_sent_at',
     ];
 
     protected $casts = [
@@ -47,6 +49,8 @@ class Meeting extends Model
         'scheduled_at' => 'datetime',
         'canceled_at' => 'datetime',
         'completed_at' => 'datetime',
+        'reminder_eve_sent_at' => 'datetime',
+        'reminder_one_hour_sent_at' => 'datetime',
     ];
 
     /**
