@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\MeetingPackController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\QaThreadModerationController;
@@ -534,6 +535,19 @@ Route::middleware(['auth', 'role:admin'])
         Route::delete('{thread}', [QaThreadModerationController::class, 'destroy'])->name('destroy');
         Route::delete('{thread}/replies/{reply}', [QaThreadModerationController::class, 'destroyReply'])
             ->name('replies.destroy');
+    });
+
+// ============================================================
+// 管理者専用 — お知らせ配信(受講生への一斉通知)
+// ============================================================
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin/announcements')
+    ->name('admin.announcements.')
+    ->group(function () {
+        Route::get('/', [AnnouncementController::class, 'index'])->name('index');
+        Route::get('create', [AnnouncementController::class, 'create'])->name('create');
+        Route::post('/', [AnnouncementController::class, 'store'])->name('store');
+        Route::get('{announcement}', [AnnouncementController::class, 'show'])->name('show');
     });
 
 // ============================================================
