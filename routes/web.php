@@ -18,6 +18,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\EnrollmentGoalController;
 use App\Http\Controllers\EnrollmentManagementController;
+use App\Http\Controllers\EnrollmentNoteController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LearningHourTargetController;
 use App\Http\Controllers\MeetingController;
@@ -469,6 +470,20 @@ Route::middleware(['auth'])
         Route::post('avatar', [SettingsController::class, 'storeAvatar'])->name('avatar.store');
         Route::delete('avatar', [SettingsController::class, 'destroyAvatar'])->name('avatar.destroy');
     });
+
+// ============================================================
+// コーチメモ(担当コーチ / 管理者のみ、Policy で担保。受講生は全拒否)
+// ============================================================
+Route::middleware(['auth'])->group(function () {
+    Route::post('enrollments/{enrollment}/notes', [EnrollmentNoteController::class, 'store'])
+        ->name('enrollments.notes.store');
+    Route::get('enrollment-notes/{enrollmentNote}/edit', [EnrollmentNoteController::class, 'edit'])
+        ->name('enrollment-notes.edit');
+    Route::patch('enrollment-notes/{enrollmentNote}', [EnrollmentNoteController::class, 'update'])
+        ->name('enrollment-notes.update');
+    Route::delete('enrollment-notes/{enrollmentNote}', [EnrollmentNoteController::class, 'destroy'])
+        ->name('enrollment-notes.destroy');
+});
 
 // ============================================================
 // アプリ内通知(全ロール共通、本人の通知のみ)
