@@ -153,6 +153,16 @@ class Enrollment extends Model
         return $this->hasMany(EnrollmentGoal::class);
     }
 
+    /**
+     * 受講登録配下のコーチメモ(コーチ / 管理者が記録する業務メモ)。
+     *
+     * @return HasMany<EnrollmentNote, $this>
+     */
+    public function notes(): HasMany
+    {
+        return $this->hasMany(EnrollmentNote::class);
+    }
+
     public function scopeLearning(Builder $query): Builder
     {
         return $query->where('status', EnrollmentStatus::Learning->value);
