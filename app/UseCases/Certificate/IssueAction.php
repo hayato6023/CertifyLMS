@@ -9,6 +9,7 @@ use App\Exceptions\Certification\CertificateAlreadyIssuedException;
 use App\Exceptions\Certification\EnrollmentNotPassedException;
 use App\Models\Certificate;
 use App\Models\Enrollment;
+use App\Services\CertificatePdfService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -23,6 +24,10 @@ use Illuminate\Support\Str;
  */
 final class IssueAction
 {
+    public function __construct(
+        private readonly CertificatePdfService $pdfService,
+    ) {}
+
     /**
      * @throws EnrollmentNotPassedException 受講登録が修了状態ではない
      * @throws CertificateAlreadyIssuedException 同一 Enrollment で修了証が既発行
@@ -44,13 +49,18 @@ final class IssueAction
                 throw new CertificateAlreadyIssuedException;
             }
 
-            return Certificate::create([
+            $certificate = Certificate::create([
                 'user_id' => $enrollment->user_id,
                 'enrollment_id' => $enrollment->id,
                 'certification_id' => $enrollment->certification_id,
                 'pdf_path' => 'certificates/'.Str::ulid().'.pdf',
                 'issued_at' => now(),
             ]);
+
+            // PDF 実体を生成・保存する。失敗時は例外がトランザクションをロールバックし、修了証は発行されない。
+            $this->pdfService->generate($certificate);
+
+            return $certificate;
         });
     }
 }

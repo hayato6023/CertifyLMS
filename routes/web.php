@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\QaThreadModerationController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\BrowseController;
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CertificationCatalogController;
 use App\Http\Controllers\CertificationCategoryController;
 use App\Http\Controllers\CertificationCoachAssignmentController;
@@ -498,6 +499,14 @@ Route::middleware(['auth'])
         Route::post('{notification}/read', [NotificationController::class, 'markAsRead'])->name('markAsRead');
         Route::get('{notification}', [NotificationController::class, 'show'])->name('show');
     });
+
+// ============================================================
+// 修了証 PDF ダウンロード(本人 / 担当コーチ / 管理者、Policy で担保)
+// ============================================================
+Route::middleware(['auth'])->group(function () {
+    Route::get('certificates/{certificate}/download', [CertificateController::class, 'download'])
+        ->name('certificates.download');
+});
 
 // ============================================================
 // 受講生・コーチ共有 — 質問掲示板(公開 Q&A)
