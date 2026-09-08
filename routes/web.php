@@ -48,6 +48,7 @@ use App\Http\Controllers\SectionQuizController;
 use App\Http\Controllers\SectionQuizResultController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Settings\AvailabilityController as SettingsAvailabilityController;
+use App\Http\Controllers\Settings\GoogleCalendarController;
 use App\Http\Controllers\Settings\SettingsDefaultEnrollmentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WeakDrillController;
@@ -605,6 +606,18 @@ Route::middleware(['auth', 'role:coach'])->prefix('coach')->name('coach.')->grou
 // ============================================================
 // コーチ専用ルート — 面談可能時間枠の編集
 // ============================================================
+// ============================================================
+// コーチ専用 — Google カレンダー連携(OAuth)
+// ============================================================
+Route::middleware(['auth', 'role:coach'])
+    ->prefix('settings/google-calendar')
+    ->name('settings.google-calendar.')
+    ->group(function () {
+        Route::get('connect', [GoogleCalendarController::class, 'redirect'])->name('redirect');
+        Route::get('callback', [GoogleCalendarController::class, 'callback'])->name('callback');
+        Route::delete('/', [GoogleCalendarController::class, 'destroy'])->name('destroy');
+    });
+
 Route::middleware(['auth', 'role:coach'])
     ->prefix('settings/availability')
     ->name('settings.availability.')
