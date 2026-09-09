@@ -270,6 +270,16 @@ class User extends Authenticatable
     }
 
     /**
+     * 受講生の AI 相談の会話。
+     *
+     * @return HasMany<AiChatConversation, $this>
+     */
+    public function aiChatConversations(): HasMany
+    {
+        return $this->hasMany(AiChatConversation::class);
+    }
+
+    /**
      * 参加している ChatRoom の中間テーブルレコード一覧。
      *
      * @return HasMany<ChatMember, $this>
