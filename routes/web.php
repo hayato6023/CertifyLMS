@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\MeetingPackController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\QaThreadModerationController;
+use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\CertificateController;
@@ -508,6 +509,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('certificates/{certificate}/download', [CertificateController::class, 'download'])
         ->name('certificates.download');
 });
+
+// ============================================================
+// AI 相談(Gemini) — 学習中の受講生のみ、機能スイッチで ON/OFF
+// ============================================================
+Route::middleware(['auth', 'role:student', 'active-learning', 'ai-chat.enabled'])
+    ->prefix('ai-chat')
+    ->name('ai-chat.')
+    ->group(function () {
+        Route::get('/', [AiChatController::class, 'index'])->name('index');
+        Route::post('conversations', [AiChatController::class, 'store'])->name('conversations.store');
+        Route::get('conversations/{conversation}', [AiChatController::class, 'show'])->name('conversations.show');
+        Route::patch('conversations/{conversation}', [AiChatController::class, 'update'])->name('conversations.update');
+        Route::delete('conversations/{conversation}', [AiChatController::class, 'destroy'])->name('conversations.destroy');
+        Route::post('conversations/{conversation}/messages', [AiChatController::class, 'storeMessage'])->name('conversations.messages.store');
+    });
 
 // ============================================================
 // 受講生・コーチ共有 — 質問掲示板(公開 Q&A)
