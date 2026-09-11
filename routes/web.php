@@ -25,7 +25,9 @@ use App\Http\Controllers\EnrollmentNoteController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LearningHourTargetController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\MeetingQuotaCheckoutController;
 use App\Http\Controllers\MeetingQuotaHistoryController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\MockExamAnswerController;
 use App\Http\Controllers\MockExamCatalogController;
 use App\Http\Controllers\MockExamController;
@@ -650,6 +652,11 @@ Route::middleware(['auth', 'role:coach'])
 Route::middleware(['auth', 'role:student', 'active-learning'])->prefix('meeting-quota')->name('meeting-quota.')->group(function () {
     // 面談回数履歴
     Route::get('history', [MeetingQuotaHistoryController::class, 'index'])->name('history');
+
+    // 追加面談購入(Stripe Checkout)
+    Route::get('checkout', [MeetingQuotaCheckoutController::class, 'select'])->name('checkout.select');
+    Route::post('checkout', [MeetingQuotaCheckoutController::class, 'create'])->name('checkout.create');
+    Route::get('success', [MeetingQuotaCheckoutController::class, 'success'])->name('checkout.success');
 });
 
 // ============================================================
@@ -660,3 +667,8 @@ if (app()->environment('local')) {
         return view('_dev.components');
     })->name('_dev.components');
 }
+
+// ============================================================
+// Stripe Webhook(認証なし・署名検証のみ、CSRF 除外)
+// ============================================================
+Route::post('webhooks/stripe', [StripeWebhookController::class, 'handle'])->name('webhooks.stripe');
