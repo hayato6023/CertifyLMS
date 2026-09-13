@@ -13,6 +13,7 @@ import { initTextareaCounter } from './components/textarea-counter';
 import { initEnrollmentSwitchers } from './components/enrollment-switcher';
 import { initAiChatWidget } from './ai-chat/floating-widget';
 import { initLearningCalendar } from './dashboard/learning-calendar';
+import './notifications/popover'; // 通知ポップオーバー(S-A-05、DOMContentLoaded で自己初期化)
 
 document.addEventListener('DOMContentLoaded', () => {
     initModals();
