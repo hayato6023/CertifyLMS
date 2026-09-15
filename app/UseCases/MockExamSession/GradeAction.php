@@ -50,8 +50,10 @@ final class GradeAction
         }
 
         $totalQuestions = $session->total_questions;
+        // 得点率は百分率(0〜100 スケール)で算出する。合格基準点(passing_score_snapshot)も
+        // 0〜100 の整数のため、同じスケールで比較する(以前は 0〜1 で保存し常に不合格になっていた)。
         $scorePercentage = $totalQuestions > 0
-            ? round($totalCorrect / $totalQuestions, 2)
+            ? round($totalCorrect / $totalQuestions * 100, 2)
             : 0.0;
         $pass = $scorePercentage >= (float) $session->passing_score_snapshot;
 
