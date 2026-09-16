@@ -24,9 +24,11 @@ final class TermJudgementService
      */
     public function recalculate(Enrollment $enrollment): TermType
     {
+        // キャンセル(未開始のまま破棄)は「進行中の模試」に含めない。
+        // in_progress / submitted / graded のいずれかがあるときだけ実践タームと判定する。
         $hasActiveMock = MockExamSession::query()
             ->where('enrollment_id', $enrollment->id)
-            ->whereIn('status', ['in_progress', 'submitted', 'graded', 'canceled'])
+            ->whereIn('status', ['in_progress', 'submitted', 'graded'])
             ->exists();
 
         $newTerm = $hasActiveMock ? TermType::MockPractice : TermType::BasicLearning;
