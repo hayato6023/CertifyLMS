@@ -47,6 +47,10 @@ final class IndexAction
         }
 
         return $query
+            // N+1 回避: 一覧行が参照する 所属資格 / 作成者 / 更新者 を Eager Load し、
+            // 問題数はサブクエリカウント(Blade が参照する questions_count エイリアスを維持)。
+            ->with(['certification', 'createdBy', 'updatedBy'])
+            ->withCount(['mockExamQuestions as questions_count'])
             ->orderBy('certification_id')
             ->orderBy('order')
             ->orderByDesc('updated_at')
