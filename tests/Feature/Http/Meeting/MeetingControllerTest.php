@@ -257,9 +257,10 @@ class MeetingControllerTest extends TestCase
 
     public function test_store_blocks_double_booking_for_same_coach_and_slot(): void
     {
-        // Arrange: 予約可能コンテキスト + 同コーチ・同時刻に canceled 面談を 1 件先在させる。
-        // canceled は候補抽出(予約済コーチ除外)をすり抜けるが、(coach_id, scheduled_at) UNIQUE は
-        // status を問わず効くため、並行を起こさず決定論的に二重予約の衝突を再現できる。
+        // Arrange: 予約可能コンテキスト + 同コーチ・同時刻に reserved 面談を 1 件先在させる。
+        // B-A-01 の生成列 reserved_slot_key は status='reserved' のときだけ (coach_id, scheduled_at) を
+        // 値に持ち UNIQUE 対象になる(canceled / completed は NULL = 対象外で、キャンセル後の再予約は許容)。
+        // 唯一の担当コーチが同時刻に予約済のため、新規予約は候補ゼロ or UNIQUE 衝突で弾かれる。
         $student = User::factory()->student()->inProgress()->create(['max_meetings' => 3]);
         $otherStudent = User::factory()->student()->create();
         $admin = User::factory()->admin()->create();
@@ -272,7 +273,7 @@ class MeetingControllerTest extends TestCase
         $enrollment = Enrollment::factory()->for($student, 'user')->for($certification)->learning()->create();
         $scheduledAt = now()->startOfDay()->next(Carbon::MONDAY)->setTime(10, 0); // 次の月曜 10:00(未来)
 
-        Meeting::factory()->canceled()->forCoach($coach)->forStudent($otherStudent)->create([
+        Meeting::factory()->reserved()->forCoach($coach)->forStudent($otherStudent)->create([
             'scheduled_at' => $scheduledAt,
         ]);
 
@@ -284,13 +285,13 @@ class MeetingControllerTest extends TestCase
                 'topic' => '相談したい',
             ]);
 
-        // Assert: 二重予約は成立せず、新規 reserved は作られない(canceled の 1 件のみが残る)
+        // Assert: 二重予約は成立せず、reserved は先在の 1 件のみに保たれる
         $response->assertRedirect();
         $response->assertSessionHas('error');
         $this->assertSame(
-            0,
+            1,
             Meeting::query()->where('status', MeetingStatus::Reserved->value)->count(),
-            '同コーチ・同時刻の二重予約は (coach_id, scheduled_at) UNIQUE で阻止されるはず',
+            '同コーチ・同時刻の二重予約は阻止され、reserved は先在の 1 件だけに保たれるはず',
         );
     }
 
