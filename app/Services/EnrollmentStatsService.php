@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\EnrollmentStatus;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -24,6 +25,18 @@ class EnrollmentStatsService
      * @return array{learning_count: int, passed_count: int, failed_count: int, total: int, by_certification: array<int, array{certification_id: string, certification_name: string, learning: int, passed: int, failed: int, total: int}>}
      */
     public function adminKpi(): array
+    {
+        return Cache::remember(
+            config('dashboard.admin_kpi_cache_key'),
+            config('dashboard.admin_stats_cache_ttl'),
+            fn (): array => $this->computeAdminKpi(),
+        );
+    }
+
+    /**
+     * @return array{learning_count: int, passed_count: int, failed_count: int, total: int, by_certification: array<int, array{certification_id: string, certification_name: string, learning: int, passed: int, failed: int, total: int}>}
+     */
+    private function computeAdminKpi(): array
     {
         $counts = DB::table('enrollments')
             ->whereNull('deleted_at')
@@ -77,6 +90,18 @@ class EnrollmentStatsService
      */
     public function completionRateByCertification(): Collection
     {
+        return Cache::remember(
+            config('dashboard.admin_completion_rate_cache_key'),
+            config('dashboard.admin_stats_cache_ttl'),
+            fn (): Collection => $this->computeCompletionRateByCertification(),
+        );
+    }
+
+    /**
+     * @return Collection<int, array{certification_id: string, certification_name: string, learning: int, passed: int, failed: int, total: int, completion_rate: float}>
+     */
+    private function computeCompletionRateByCertification(): Collection
+    {
         return collect($this->byCertification())
             ->filter(fn (array $row): bool => $row['total'] > 0)
             ->map(function (array $row): array {
@@ -86,6 +111,16 @@ class EnrollmentStatsService
             })
             ->sortByDesc('total')
             ->values();
+    }
+
+    /**
+     * 管理者ダッシュボード集計(全体 KPI + 資格別修了率)のキャッシュを無効化する。
+     * 受講状態の遷移が起きたときに呼び、次回表示で最新値を再集計させる。
+     */
+    public function flushAdminStatsCache(): void
+    {
+        Cache::forget(config('dashboard.admin_kpi_cache_key'));
+        Cache::forget(config('dashboard.admin_completion_rate_cache_key'));
     }
 
     /**
