@@ -11,6 +11,11 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        <!-- 外部 API(Google / Gemini / Stripe)連携のモックテスト。group external を付与しており、
+             testsuite External で分離実行、group / exclude-group external で絞り込み・除外ができる。 -->
+        <testsuite name="External">
+            <directory>tests/Feature/External</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
