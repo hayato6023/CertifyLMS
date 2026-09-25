@@ -6,6 +6,7 @@ namespace App\Notifications;
 
 use App\Models\QaReply;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -14,12 +15,32 @@ use Illuminate\Notifications\Notification;
  *
  * アプリ内(database)＋メール(mail)で配信する。回答者本人には送らない
  * (発火側で投稿者 != 回答者を担保する)。
+ *
+ * ShouldQueue: 回答投稿リクエストからメール送信を切り離す。$afterCommit=true で、回答レコードの
+ * commit 後にのみ投入する(ロールバック時に通知が漏れない)。一時失敗は backoff でリトライする。
  */
-final class QaReplyReceivedNotification extends Notification
+final class QaReplyReceivedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(private readonly QaReply $reply) {}
+    /** リトライ上限(超過分は failed_jobs へ記録される)。 */
+    public int $tries = 3;
+
+    public function __construct(private readonly QaReply $reply)
+    {
+        // トランザクション commit 後にのみキュー投入する(Queueable::$afterCommit を設定)。
+        $this->afterCommit = true;
+    }
+
+    /**
+     * 一時的な送信失敗時の段階的な待機(秒)。10s → 30s → 60s。
+     *
+     * @return array<int, int>
+     */
+    public function backoff(): array
+    {
+        return [10, 30, 60];
+    }
 
     /**
      * @return array<int, string>
