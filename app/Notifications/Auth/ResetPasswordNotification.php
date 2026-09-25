@@ -5,10 +5,28 @@ declare(strict_types=1);
 namespace App\Notifications\Auth;
 
 use Illuminate\Auth\Notifications\ResetPassword as BaseResetPassword;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ResetPasswordNotification extends BaseResetPassword
+/**
+ * パスワード再設定メール。ShouldQueue で送信を非同期化し、リクエストをブロックしない。
+ * 一時失敗は backoff でリトライする。
+ */
+class ResetPasswordNotification extends BaseResetPassword implements ShouldQueue
 {
+    /** リトライ上限(超過分は failed_jobs へ記録される)。 */
+    public int $tries = 3;
+
+    /**
+     * 一時的な送信失敗時の段階的な待機(秒)。10s → 30s → 60s。
+     *
+     * @return array<int, int>
+     */
+    public function backoff(): array
+    {
+        return [10, 30, 60];
+    }
+
     public function toMail($notifiable): MailMessage
     {
         $url = url(route('password.reset', [

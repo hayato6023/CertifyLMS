@@ -6,6 +6,7 @@ namespace App\Notifications;
 
 use App\Models\Meeting;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -13,15 +14,31 @@ use Illuminate\Notifications\Notification;
  * 予約済み面談のリマインダー通知(前日 / 開始 1 時間前)。アプリ内(database)＋メール(mail)。
  *
  * window は 'eve'(前日)または 'one_hour_before'(1 時間前)。文言をウィンドウで出し分ける。
+ *
+ * ShouldQueue: 定期実行コマンドが対象面談を chunk でループ送信するため、各送信をキューへ逃がして
+ * コマンドの実行時間と外部依存(メール送信)を発火元から切り離す。一時失敗は backoff でリトライする。
  */
-final class MeetingReminderNotification extends Notification
+final class MeetingReminderNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    /** リトライ上限(超過分は failed_jobs へ記録される)。 */
+    public int $tries = 3;
 
     public function __construct(
         private readonly Meeting $meeting,
         private readonly string $window,
     ) {}
+
+    /**
+     * 一時的な送信失敗時の段階的な待機(秒)。10s → 30s → 60s。
+     *
+     * @return array<int, int>
+     */
+    public function backoff(): array
+    {
+        return [10, 30, 60];
+    }
 
     /**
      * @return array<int, string>
