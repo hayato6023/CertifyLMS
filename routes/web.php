@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Admin\AnnouncementController;
-use App\Http\Controllers\Admin\MeetingPackController;
-use App\Http\Controllers\Admin\PlanController;
-use App\Http\Controllers\Admin\QaThreadModerationController;
+use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\MeetingPackController;
+use App\Http\Controllers\PlanController;
+use App\Http\Controllers\QaThreadModerationController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\BrowseController;

@@ -156,7 +156,7 @@
                             <span class="text-sm text-ink-900 tabular-nums">¥{{ number_format($payment->amount) }}</span>
                         </x-table.cell>
                         <x-table.cell class="text-right">
-                            <span class="text-sm text-ink-700 tabular-nums">{{ $payment->quantity }} 回</span>
+                            <span class="text-sm text-ink-700 tabular-nums">{{ $payment->meeting_count }} 回</span>
                         </x-table.cell>
                         <x-table.cell>
                             <x-badge :variant="$pb['variant']" size="sm">{{ $payment->status->label() }}</x-badge>

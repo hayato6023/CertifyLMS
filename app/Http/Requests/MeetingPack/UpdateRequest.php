@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\MeetingPack;
 
-use App\Http\Controllers\Admin\MeetingPackController;
+use App\Http\Controllers\MeetingPackController;
 use App\Models\MeetingPack;
 use Illuminate\Foundation\Http\FormRequest;
 

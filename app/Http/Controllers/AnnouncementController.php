@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Announcement\StoreRequest;
 use App\Models\Announcement;
 use App\Models\Certification;

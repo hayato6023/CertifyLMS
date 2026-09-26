@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\UseCases\Plan;
 
 use App\Enums\PlanStatus;
-use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\PlanController;
 use App\Models\Plan;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
