@@ -73,24 +73,52 @@ cp .env.example .env
 
 ---
 
-## 外部API設定
+## 外部API連携の状態
 
-Advance フェーズで必要な環境変数:
+### 現状: モックで完結
+
+本プロジェクトの外部 API 連携（Gemini / Google Calendar / Stripe）は、**開発・テストをモックで完結**させています。
+
+- アプリ本体には実 API 連携コードを実装済み（Gemini・Google は Laravel HTTP クライアント経由、Stripe は公式 SDK 経由）。
+- **テストは実 API を叩きません**。`Http::fake()` によるレスポンス差し替え、または対象サービスをスタブに差し替えることで外部通信・署名検証を遮断しています。
+- そのため、**API キーが未設定でもセットアップ・`sail artisan test` は通ります**。クリーン環境での動作確認（`verify.sh`）もキー不要です。
+
+### 未設定時の挙動
+
+| 機能 | チケット | キー未設定時の挙動 |
+|------|---------|-------------------|
+| AI相談（Gemini） | S-A-02 | 送信時に `status=error` を返す。画面・ルート自体は動作 |
+| カレンダー連携（Google Calendar） | S-A-01 | 連携をスキップし従来の空き判定にフォールバック。**面談機能自体は動作** |
+| 追加面談購入（Stripe） | S-A-03 | Checkout セッション作成に失敗。**購入導線のみ利用不可** |
+
+### 実運用で有効化する場合
+
+各サービスの認証情報を `.env` に設定すれば、モックではなく実 API に接続します（コード変更は不要）。設定キーは `config/services.php` / `config/ai-chat.php` に定義済みです。
 
 ```env
+# Gemini AI（S-A-02）
+# https://aistudio.google.com/ で API キーを発行
+GEMINI_API_KEY=your-key
+# 任意（既定: gemini-2.5-flash / v1beta エンドポイント）
+# GEMINI_MODEL=
+# GEMINI_ENDPOINT=
+
 # Google Calendar（S-A-01）
+# Google Cloud Console で OAuth 2.0 クライアントを作成し、
+# 承認済みリダイレクト URI に GOOGLE_REDIRECT_URI と同じ値を登録する
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=
-
-# Gemini AI（S-A-02）
-GEMINI_API_KEY=
+GOOGLE_REDIRECT_URI=https://<your-host>/settings/google-calendar/callback
 
 # Stripe（S-A-03）
-STRIPE_KEY=
-STRIPE_SECRET=
-STRIPE_WEBHOOK_SECRET=
+# Stripe ダッシュボードでシークレットキーを取得（開発は sk_test_... を推奨）
+STRIPE_SECRET=sk_test_...
+# Webhook エンドポイント登録時に発行される署名シークレット
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
+
+> 各機能の詳細仕様は `.infos/src/S-A-01`〜`S-A-03` を参照。
+> Google のコールバックは `settings/google-calendar/callback`（コーチ専用ルート `settings.google-calendar.callback`）。Cloud Console の承認済みリダイレクト URI にはホストを含めた同一 URL を登録すること。
 
 ---
 
