@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
 use App\Enums\CertificationStatus;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\QaThread\AdminIndexRequest;
 use App\Models\Certification;
 use App\Models\QaReply;

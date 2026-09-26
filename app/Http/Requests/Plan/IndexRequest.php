@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Plan;
 
 use App\Enums\PlanStatus;
-use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\PlanController;
 use App\Models\Plan;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;

@@ -6,7 +6,7 @@ namespace App\UseCases\Plan;
 
 use App\Enums\PlanStatus;
 use App\Exceptions\Plan\PlanInvalidTransitionException;
-use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\PlanController;
 use App\Models\Plan;
 use App\Models\User;
 

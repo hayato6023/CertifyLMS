@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\UseCases\MeetingPack;
 
 use App\Enums\MeetingPackStatus;
-use App\Http\Controllers\Admin\MeetingPackController;
+use App\Http\Controllers\MeetingPackController;
 use App\Models\MeetingPack;
 use App\Models\Payment;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;

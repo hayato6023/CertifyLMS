@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\QaThread;
 
-use App\Http\Controllers\Admin\QaThreadModerationController;
+use App\Http\Controllers\QaThreadModerationController;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
